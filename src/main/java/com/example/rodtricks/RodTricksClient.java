@@ -10,7 +10,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.phys.Vec3;
 
@@ -41,7 +41,6 @@ public class RodTricksClient implements ClientModInitializer {
         selfUse = true;
         try {
             mc.gameMode.useItem(p, hand);
-            p.swing(hand);
         } finally {
             selfUse = false;
         }
@@ -81,7 +80,7 @@ public class RodTricksClient implements ClientModInitializer {
     /** Click izquierdo = lanzar/recoger la cana. Se consume antes de que vanilla lo trate como ataque. */
     private static void onStartTick(Minecraft mc) {
         LocalPlayer p = mc.player;
-        if (p == null || mc.gameMode == null || mc.screen != null) return;
+        if (p == null || mc.gameMode == null) return;
         if (rodHand(p) == null) return;
         while (mc.options.keyAttack.consumeClick()) {
             useRod(mc, p);
@@ -90,7 +89,7 @@ public class RodTricksClient implements ClientModInitializer {
 
     private static void onEndTick(Minecraft mc) {
         LocalPlayer p = mc.player;
-        if (p == null || mc.gameMode == null || mc.screen != null) { holdTicks = 0; return; }
+        if (p == null || mc.gameMode == null) { holdTicks = 0; return; }
 
         var hook = p.fishing;
         if (hook == null || rodHand(p) == null) { holdTicks = 0; return; }
@@ -99,7 +98,7 @@ public class RodTricksClient implements ClientModInitializer {
         if (hooked == null) { holdTicks = 0; return; }
 
         // ---- Silverfish: recoger solo + gran salto ----
-        if (hooked.getType() == EntityType.SILVERFISH) {
+        if (hooked.getType() == EntityTypes.SILVERFISH) {
             Vec3 v = p.getDeltaMovement();
             p.setDeltaMovement(v.x, SILVERFISH_JUMP, v.z);
             p.fallDistance = 0;
@@ -109,7 +108,7 @@ public class RodTricksClient implements ClientModInitializer {
         }
 
         // ---- Endermite ----
-        if (hooked.getType() == EntityType.ENDERMITE && hooked.isAlive()) {
+        if (hooked.getType() == EntityTypes.ENDERMITE && hooked.isAlive()) {
             Vec3 toMite = hooked.position().add(0, hooked.getBbHeight() / 2.0, 0).subtract(p.getEyePosition());
             double dist = toMite.length();
             boolean down = mc.options.keyUse.isDown();
